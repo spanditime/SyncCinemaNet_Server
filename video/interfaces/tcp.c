@@ -1,13 +1,14 @@
 #include "errors.h"
+#include "tcp.h"
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/epoll.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <errno.h>
 
 extern int errno;
-enum {LOCAL, INET};
 
 int tcp_create(int net, int port, int size) {
   struct hostent host;
@@ -32,4 +33,21 @@ int tcp_create(int net, int port, int size) {
     die_pos_err(errno);
   }
   return sock;
+}
+
+int tcp_server(struct epoll_event *event, int net, int port) {
+  int listen_sock, current_sock, esock;
+  esock = epoll_create1(0);
+  if(esock == -1) {
+    die_pos_err(errno);
+  }
+  event->events = EPOLLIN;
+  listen_sock = tcp_create(net,port,LISTEN);
+  while(1) {
+    current_sock = accept(listen_sock,NULL,NULL);
+    event->data.fd = current_sock;
+    if(epoll_ctl(esock,EPOLL_CTL_ADD,current_sock,event) == -1) {
+      die_pos_err(errno);
+    }
+  }
 }
