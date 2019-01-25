@@ -1,1 +1,2 @@
-# SyncCinemaNet_Server
+# SyncCinemaNet Server
+# Сервер для сервиса SyncCinemaNet (ru)
