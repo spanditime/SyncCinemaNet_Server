@@ -6,7 +6,7 @@
   #endif
   #include <sys/epoll.h>
   enum {LOCAL, INET};
-  int tcp_create(int net, int port, int size);
-  int tcp_server(struct epoll_event *event, int* efd, int net, int port);
+  int tcp_create(const char* ip, int port, int size);
+  int tcp_server(struct epoll_event *event, int* efd, const char* ip, int port);
   int tcp_listen(int *efd, int (*callback)(int));
 #endif
