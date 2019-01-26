@@ -10,8 +10,14 @@ void* start1(void* param);
 void* start2(void* param);
 int echo_server(int fd);
 int efd = -1;
+char* ip;
 
-int main() {
+int main(int argc, char** argv) {
+  if(argc != 2) {
+    ip = NULL;
+  } else {
+    ip = argv[1];
+  }
   pthread_t tid1, tid2;
   pthread_attr_t attr;
   pthread_attr_init(&attr);
@@ -35,7 +41,7 @@ int echo_server(int fd) {
 }
 
 void* start1(void* param) {
-  tcp_server(&main_event,&efd,LOCAL,8000);
+  tcp_server(&main_event,&efd,ip,8000);
   return NULL;
 }
 

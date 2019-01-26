@@ -11,15 +11,15 @@
 
 extern int errno;
 
-int tcp_create(int net, int port, int size) {
+int tcp_create(const char* ip, int port, int size) {
   struct hostent host;
 	struct sockaddr_in saddr;
 	saddr.sin_family = AF_INET;
 	saddr.sin_port = htons(port);
-	if (net == LOCAL) {
+	if (ip == NULL) {
 		saddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	} else {
-    die_err(SE_DEV);
+    inet_aton(ip, &saddr.sin_addr.s_addr);
   }
   int sock = socket(AF_INET,SOCK_STREAM,0);
   if(sock == -1) {
@@ -42,7 +42,7 @@ int tcp_create(int net, int port, int size) {
   return sock;
 }
 
-int tcp_server(struct epoll_event *event,int* efd, int net, int port) {
+int tcp_server(struct epoll_event *event,int* efd, const char* ip, int port) {
   int listen_sock, current_sock, esock;
   esock = epoll_create1(0);
   if(esock == -1) {
@@ -52,7 +52,7 @@ int tcp_server(struct epoll_event *event,int* efd, int net, int port) {
   }
   *efd = esock;
   event->events = EPOLLIN;
-  listen_sock = tcp_create(net,port,LISTEN);
+  listen_sock = tcp_create(ip,port,LISTEN);
   while(1) {
     current_sock = accept(listen_sock,NULL,NULL);
     event->data.fd = current_sock;
