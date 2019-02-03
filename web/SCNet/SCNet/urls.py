@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from SCNet.core import views
+
+
 urlpatterns = [
+    path('', views.index),
+    path('index.html', views.index),
     path('admin/', admin.site.urls),
 ]
