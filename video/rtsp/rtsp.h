@@ -1,4 +1,4 @@
-#ifndef RSTP
-  #define RSTP
-  int rstp_server(int fd);
+#ifndef RTSP
+  #define RTSP
+  int rtsp_server(int fd);
 #endif

@@ -15,4 +15,4 @@
 * void die_pos_err(int err): Закончить работу сервера и вывести сообщение по стандартому коду ошибки POSIX
 ## Сборка проекта
     cd video
-    gcc server.c interfaces/tcp.c interfaces/errors.c rstp/rstp.c -lpthread
+    gcc server.c interfaces/tcp.c interfaces/errors.c rtsp/rtsp.c -lpthread

@@ -2,7 +2,7 @@
 
 #define BUF_SIZE 1024
 
-int rstp_server(int fd) {
+int rtsp_server(int fd) {
   /*
   Здесь скоро будет нормальный обработчик
   */
