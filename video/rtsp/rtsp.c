@@ -53,7 +53,7 @@ int rtsp_server(int fd) {
     }
     msg.content=strtok(NULL," \n");
     while(tok != 0){
-
+      
     }
   }
 
