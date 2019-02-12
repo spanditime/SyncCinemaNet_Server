@@ -13,17 +13,22 @@
     RTSP_METHOD_REDIRECT=5,
     RTSP_METHOD_SETUP=6,
     RTSP_METHOD_ANNOUNCE=7,
-    /*not supported yet
     RTSP_METHOD_GET_PARAMETER=8,
     RTSP_METHOD_SET_PARAMETER=9,
-    */
     RTSP_METHOD_TEARDOWN=10
   };
 
   typedef struct RtspMessage_{
     enum RtspMethods method;
-    char *content;
-    int CSeq;
+    char *URI;
+    int cseq;
+    int rtspVerMinor,rtspVerMajor;
+    int fieldsCount;
+    struct Field{
+      char *header;
+      char *value; 
+    } *fields;
+    char* content;
   } RtspMessage;
 
 #endif

@@ -3,10 +3,14 @@
 #include <string.h>
 
 #include "rtsp.h"
+#include "interfaces/errors.h"
 
 #define BUF_SIZE 1024
 
 int rtsp_server(int fd) {
+  die_err(SE_DEV);
+  return -1;
+
   /*
   Здесь скоро будет нормальный обработчик
   */
@@ -19,7 +23,7 @@ int rtsp_server(int fd) {
   if(requestSize == -1) {
     return 1;
   }else if(requestSize == 0){
-    wbuf=strcpy(wbuf,"RTSP/1.0 400 Bad Request\0");
+    strcpy(wbuf,"RTSP/1.0 400 Bad Request\0");
   }else{
     //parse
     char *tok;
@@ -40,23 +44,53 @@ int rtsp_server(int fd) {
       msg.method=RTSP_METHOD_SETUP;
     }else if(!strcmp(tok,"ANNOUNCE")){
       msg.method=RTSP_METHOD_ANNOUNCE;
-    /*not supported yet
     }else if(!strcmp(tok,"GET_PARAMETER")){
       msg.method=RTSP_METHOD_GET_PARAMETER;
     }else if(!strcmp(tok,"SET_PARAMETER")){
       msg.method=RTSP_METHOD_SET_PARAMETER;
-    */
     }else if(!strcmp(tok,"TEARDOWN")){
       msg.method=RTSP_METHOD_TEARDOWN;
     }else{
       msg.method=RTSP_METHOD_ERROR;
     }
-    msg.content=strtok(NULL," \n");
-    while(tok != 0){
-      
-    }
-  }
+    msg.URI=strtok(NULL," \n");
+    strtok(NULL," /");//пропускаем RTSP
+    msg.rtspVerMajor=atoi(strtok(NULL,"/."));
+    msg.rtspVerMinor=atoi(strtok(NULL,". \n"));
+    msg.cseq=0;
+    msg.fieldsCount=0;
 
+    msg.fields=(struct Field *) malloc(sizeof(struct Field));
+    tok=strtok(NULL,": \n");//cтрока
+    while(tok != NULL){
+      //парсинг пары заголовок: значение
+      msg.fields=(struct Field *) realloc((void *)msg.fields,sizeof(struct Field)*(msg.fieldsCount+=1));
+      msg.fields[msg.fieldsCount-1].header=tok;
+      tok=strtok(NULL,": \n");
+      if(tok != NULL){
+        msg.fields[msg.fieldsCount-1].value=(char *) malloc(sizeof(char)*strlen(tok));
+        strcpy(msg.fields[msg.fieldsCount-1].value,tok);
+      }else{
+        strcpy(wbuf,"RSTP/1.0 451 Parameter Not Understood");
+        free(buf);
+        tok=NULL;
+        goto Write;
+      }
+      //проверка на Content-Length
+      if(!strcmp(msg.fields[msg.fieldsCount-1].header,"Content-Length")){
+        // +2 для безопасности, для \0
+        msg.content=strtok(NULL,"\0");
+        free(buf);
+        tok=NULL;
+        strcpy(wbuf,"DONE");
+        goto Write;
+      }
+      tok=strtok(NULL,": \n");//cтрока
+    }
+
+  }
+  
+Write:
   requestSize = write(fd,wbuf,strlen(wbuf));
   if(requestSize == -1) {
     return -1;
