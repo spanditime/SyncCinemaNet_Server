@@ -1,5 +1,12 @@
 a.out
 venv/
 skfd/
-web/SCNet/SCNet/__pycache__/settings.cpython-36.pyc
-web/.idea
+
+web/SCNet/SCNet/__pycache__
+web/SCNet/apiapp/__pycache__
+web/SCNet/apiapp/migrations
+web/SCNet/authapp/__pycache__
+web/SCNet/authapp/migrations
+web/SCNet/coreapp/__pycache__
+web/SCNet/coreapp/migrations
+web/SCNet/db.sqlite3
