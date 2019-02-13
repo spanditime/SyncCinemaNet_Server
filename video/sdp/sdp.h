@@ -21,10 +21,13 @@
     }session;
     char *URI;
     struct SdpConnectionInfo{
-
+      char *nettype;
+      char *addrtype;
+      char *connection_address;
     } *connection_info;
     struct SdpBandwidth{
-      
+      char *bwtype;
+      char *bandwidth;
     } *bandwidths;
     int bandwithsCount;
     long long int start_time,stop_time;
