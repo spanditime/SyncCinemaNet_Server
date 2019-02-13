@@ -3,7 +3,7 @@
 
   /*
     Look at SDP specification
-    https://tools.ietf.org/html/rfc4566#page-7
+    https://tools.ietf.org/html/rfc4566#section-5
   */
   typedef struct {
     int version;
