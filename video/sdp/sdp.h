@@ -140,7 +140,7 @@
     union SdpEncryption{
       char *method;
       char *key;
-    }encryption;
+    } encryption;
 
     /*
       Attributes ("a=")
@@ -167,7 +167,6 @@
       char *proto;
       char *format;
       char *title;
-      char *connection_info;
       struct SdpBandwidth *bandwidths;
       int bandwidthsCount;
       union SdpEncryption encryption;
