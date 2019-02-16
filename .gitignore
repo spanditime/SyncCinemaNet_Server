@@ -1,3 +1,15 @@
-a.out
 venv/
 skfd/
+
+# Compiled Object files
+*.o
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Executable
+*.out
+
+# vscode config files
+.vscode/*
