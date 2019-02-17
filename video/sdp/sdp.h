@@ -1,3 +1,10 @@
+/**
+ * /file 
+ * /brief Header file with structures and function
+ * declarations for working with SDP
+ * 
+ * 
+ */
 #ifndef SDP
   #define SDP
 
@@ -10,6 +17,7 @@
   struct SdpContent{
     /*
       Version of SDP(now always 0)
+      v=0
       Or if not 0, error.
       All errors codes defined at enum 
       https://tools.ietf.org/html/rfc4566#section-5.1
@@ -18,11 +26,10 @@
 
     /*
       Origin ("o=").
-      o=<username> <sess-id> <sess-version> <nettype> <addrtype>
-        <unicast-address>
+      o=<username> <sess-id> <sess-version> <nettype> <addrtype> <unicast-address>
       https://tools.ietf.org/html/rfc4566#section-5.2
     */
-    union{
+    struct {
       char *username;
       int sess_id;
       int sess_version;
@@ -31,7 +38,7 @@
       char *unicast_address;
     }origin;
 
-    union{
+    struct {
       /*
         Session name ("s=").
         s=<session name>
@@ -110,7 +117,7 @@
       char *bandwidth;
     } *bandwidths;
 
-    int bandwithsCount;
+    int bandwidthsCount;
 
     /*
       Timing ("t=")
@@ -137,7 +144,7 @@
       k=<method>:<encryption key>
       https://tools.ietf.org/html/rfc4566#section-5.12
     */
-    union SdpEncryption{
+    struct SdpEncryption{
       char *method;
       char *key;
     } encryption;
@@ -169,14 +176,19 @@
       char *title;
       struct SdpBandwidth *bandwidths;
       int bandwidthsCount;
-      union SdpEncryption encryption;
+      struct SdpEncryption encryption;
       struct SdpConnectionData *connections;
       int connectionsCount;
+      struct SdpAttribute *attributes;
+      int attributesCount;
     } *mediums;
 
     int mediumsCount;
   };
 
+  int SdpContent_init(struct SdpContent *sdp);
+
+  
   /*
     Parse SDP string into SdpContent struct
     More info about SDP:
