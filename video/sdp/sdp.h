@@ -186,9 +186,82 @@
     int mediumsCount;
   };
 
+  //SDP MANAGE FUNCTIONS(make doxygen module)
+
   int SdpContent_init(struct SdpContent *sdp);
 
+  int SdpContent_setVersion(struct SdpContent *sdp,int version);
+
+  int SdpContent_setOrigin(struct SdpContent *sdp,
+                           char *username,
+                           int sess_id,
+                           int sess_version,
+                           char *nettype,
+                           char *addrtype,
+                           char *unicast_address);
+
+  int SdpContent_setSession(struct SdpContent *sdp,
+                            char *name,
+                            char *info);
+
+  int SdpContent_setUri(struct SdpContent *sdp,char *URI);
+
+  int SdpContent_addConnection(struct SdpContent *sdp,
+                               char *nettype,
+                               char *addrtype,
+                               char *address);
+
+  int SdpContent_addBandwidth(struct SdpContent *sdp,
+                              char *bwtype,
+                              char *bandwidth);
+
+  int SdpContent_setEncryption_wKey(struct SdpContent *sdp,
+                                    char *method,
+                                    char *key);
+  int SdpContent_setEncryption(struct SdpContent *sdp,char *method);
+
+  int SdpContent_addAtribute_wValue(struct SdpContent *sdp,
+                                    char *attribute,
+                                    char *value);
+  int SdpContent_addAtribute(struct SdpContent *sdp,char *attribute);
+
+  int SdpContent_addMedia(struct SdpContent *sdp,
+                          char *type,
+                          char *port,
+                          char *proto,
+                          char *format);
   
+
+  int SdpContent_Media_setTitle(struct SdpContent *sdp,
+                                int mediaID,
+                                char *title);
+
+  int SdpContent_Media_addBandwidth(struct SdpContent *sdp,
+                                    int mediaID,
+                                    char *bwtype,
+                                    char *bandwith);
+
+  int SdpContent_Media_setEncryption_wKey(struct SdpContent *sdp,
+                                          int mediaID,
+                                          char *method,
+                                          char *key);
+  int SdpContent_Media_setEncryption(struct SdpContent *sdp,
+                                     int mediaID,
+                                     char *method);
+
+  int SdpContent_Media_addAtribute_wValue(struct SdpContent *sdp,
+                                          int mediaID,
+                                          char *attribute,
+                                          char *value);
+  int SdpContent_Media_addAtribute(struct SdpContent *sdp,
+                                   int mediaID,
+                                   char *attribute);
+
+
+  //SDP MANAGE FUNCTIONS END
+
+  //SDP PARSE FUNCTIONS(make doxygen module)
+
   /*
     Parse SDP string into SdpContent struct
     More info about SDP:
@@ -201,5 +274,6 @@
   */
   int sdpstr(char *str,struct SdpContent *sdp);
 
+  //SDP PARSE FUNCTIONS END
 
 #endif 
