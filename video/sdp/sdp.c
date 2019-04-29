@@ -19,9 +19,10 @@ int parse_sdp(struct SdpContent *sdp,char *str){
 
 /**
  * /brief
- * 
+ *
  * /todo make SdpAttributes checking
- * 
+ * /todo update return error codes
+ *
  * /param[out] str Output SDP string
  * /param[in] sdp Input SDP structure for reparse into string str
  * /return Error code or 0 if its done succeful
@@ -31,12 +32,9 @@ int sdpstr(char *str,struct SdpContent *sdp){
   //return -1;
   /*
     reparser
-    TODO:
-    []update return errors codes
   */
   if(sdp == NULL || str == NULL)
     return -1;
-  str[0]='\0';
 
   if(sdp->version)
     return sdp->version;
@@ -63,6 +61,7 @@ int sdpstr(char *str,struct SdpContent *sdp){
   if(sdp->origin.unicast_address == NULL)
     return -1;
 
+  str[0]='\0';
   /*
     v=0
     o=<username> <sess-id> <sess-version> <nettype> <addrtype> <unicast-address>
@@ -77,7 +76,7 @@ int sdpstr(char *str,struct SdpContent *sdp){
           sdp->origin.unicast_address,
           sdp->session.name
           );
-  
+
   //return 0;
 
   /*
@@ -98,7 +97,7 @@ int sdpstr(char *str,struct SdpContent *sdp){
 
   //c=<nettype> <addrtype> <connection-address>
   int cCount=strcat_connections(sdp->connections,sdp->connectionsCount,str);
-  
+
   //b=<bwtype>:<bandwidth>
   strcat_bandwidths(sdp->bandwidths,sdp->bandwidthsCount,str);
 
@@ -123,10 +122,10 @@ int sdpstr(char *str,struct SdpContent *sdp){
       sprintf(buff,"\nk=%s",
               sdp->encryption.method);
   }
-  
+
   //a=<attribute> OR a=<attribute>:<value>
   strcat_attributes(sdp->attributes,sdp->attributesCount,str);
-  
+
 
   //Media section
   if(sdp->mediums != NULL && sdp->mediumsCount > 0)
@@ -158,7 +157,7 @@ int sdpstr(char *str,struct SdpContent *sdp){
         //b=<bwtype>:<bandwidth>
         if(strcat_bandwidths(sdp->mediums[i].bandwidths,sdp->mediums[i].bandwidthsCount,str)<0)
           return -1;
-        
+
         //k=<method> OR k=<method>:<encryption key>
         if(sdp->encryption.method != NULL){
           if(strlen(sdp->encryption.key)>0)
@@ -174,6 +173,7 @@ int sdpstr(char *str,struct SdpContent *sdp){
         strcat_attributes(sdp->mediums[i].attributes,sdp->mediums[i].attributesCount,str);
       }
     }
+  strcat(str,buff);
 }
 
 
@@ -189,8 +189,8 @@ int strcat_connections(struct SdpConnectionData *connections,int connectionsCoun
       else if(//strchr(connections[i].nettype,' ') != NULL || //only one value - IN
               strcmp(connections[i].nettype,"IN") ||
               //strchr(sdp->connections[i].addrtype,' ') != NULL || //only two value - IP4/IP6
-              strcmp(connections[i].addrtype,"IP4") ||
-              strcmp(connections[i].addrtype,"IP6") ||
+              (strcmp(connections[i].addrtype,"IP4") &&
+              strcmp(connections[i].addrtype,"IP6")) ||
               strchr(connections[i].address,' ') != NULL)
         continue;
       else
@@ -218,9 +218,9 @@ int strcat_bandwidths(struct SdpBandwidth *bandwidths,int bandwidthsCount,char *
          bandwidths[i].bandwidth == NULL)
         continue;
       else if(//strchr(bandwidths[i].bwtype,' ') || //only two values CT/AS
-              strcmp(bandwidths[i].bwtype,"CT") ||
-              strcmp(bandwidths[i].bwtype,"AS") ||
-              strchr(bandwidths[i].bandwidth,' '))
+              (strcmp(bandwidths[i].bwtype,"CT") &&
+              strcmp(bandwidths[i].bwtype,"AS")) ||
+              strchr(bandwidths[i].bandwidth,' ') != NULL)
         continue;
       else{
         char *p=(char *) malloc(sizeof(char)*(7+strlen(bandwidths[i].bandwidth)));
@@ -257,6 +257,12 @@ int strcat_attributes(struct SdpAttribute *attributes,int attributesCount,char *
 }
 
 
+/////////////////////////////
+////////////////////////////
+//SDP MANAGE FUNCTIONS/////
+//////////////////////////
+/////////////////////////
+
 
 int SdpContent_init(struct SdpContent *sdp){
   sdp->version=0;
@@ -289,4 +295,154 @@ int SdpContent_init(struct SdpContent *sdp){
 
   sdp->mediums=NULL;
   sdp->mediumsCount=0;
+  return 0;
+}
+
+int SdpContent_setVersion(struct SdpContent *sdp,int version){
+  if(sdp != NULL){sdp->version=version;return 0;}
+  return -1;
+}
+
+int SdpContent_setOrigin(struct SdpContent *sdp,char *username,int sess_id,int sess_version,char *nettype,char *addrtype,char *unicast_address){
+  if(sdp != NULL && username != NULL && nettype != NULL &&
+     addrtype != NULL && unicast_address != NULL){
+    if(strchr(username,' ') != NULL || sess_id<0 || sess_version<0 ||
+        strcmp(nettype,"IN") || (strcmp(addrtype,"IP4") &&
+        strcmp(addrtype,"IP6")) || strchr(addrtype,' ') != NULL)
+      return -1;
+
+    if(sdp->origin.username != NULL)
+      free(sdp->origin.username);
+    sdp->origin.username=malloc(strlen(username));
+    if(sdp->origin.username == NULL)
+      return -1;
+    strcpy(sdp->origin.username,username);
+
+    sdp->origin.sess_id=sess_id;
+    sdp->origin.sess_version=sess_version;
+
+    sdp->origin.nettype="IN";
+
+    if(sdp->origin.addrtype != NULL)
+      free(sdp->origin.addrtype);
+    sdp->origin.addrtype=malloc(strlen(addrtype));
+    if(sdp->origin.addrtype == NULL)
+      return -1;
+    strcpy(sdp->origin.addrtype,addrtype);
+
+    if(strchr(unicast_address,' ') != NULL)
+      return -1;
+    sdp->origin.unicast_address=(char *) malloc(strlen(unicast_address));
+    if(sdp->origin.unicast_address == NULL)
+      return -1;
+    strcpy(sdp->origin.unicast_address,unicast_address);
+    return 0;
+  }
+  return -1;
+}
+
+int SdpContent_setSession(struct SdpContent *sdp,char *name,char *info){
+  if(sdp != NULL && name != NULL){
+    if(sdp->session.name != NULL)
+      free(sdp->session.name);
+    sdp->session.name=malloc(strlen(name));
+    if(sdp->session.name == NULL)
+      return -1;
+    strcpy(sdp->session.name,name);
+    if(info != NULL){
+      if(sdp->session.info != NULL)
+        free(sdp->session.info);
+      sdp->session.info=malloc(strlen(info));
+      if(sdp->session.info == NULL)
+        return -1;
+      strcpy(sdp->session.info,info);
+    }
+    return 0;
+  }
+  return -1;
+}
+
+int SdpContent_setUri(struct SdpContent *sdp,char *URI){
+  if(sdp != NULL && URI != NULL && strchr(URI,' ') == NULL){
+    if(sdp->URI != NULL)
+      free(sdp->URI);
+    sdp->URI=malloc(strlen(URI));
+    if(sdp->URI == NULL)
+      return -1;
+    strcpy(sdp->URI,URI);
+    return 0;
+  }
+  return -1;
+}
+
+int SdpContent_addConnection(struct SdpContent *sdp,char *nettype,char *addrtype,char *address){
+  if(sdp != NULL && nettype != NULL && addrtype != NULL && address != NULL){
+    if(sdp->connectionsCount <= 0 || sdp->connections == NULL){
+      sdp->connections=(struct SdpConnectionData *) malloc(sizeof(struct SdpConnectionData));
+      sdp->connectionsCount=0;
+    } else {
+      sdp->connections=(struct SdpConnectionData *) realloc((void *)sdp->connections,sizeof(struct SdpConnectionData)*(sdp->connectionsCount+1));
+    };
+    if(sdp->connections == NULL)
+      return -1;
+    
+    sdp->connections[sdp->connectionsCount].nettype=malloc(strlen(nettype));
+    if(sdp->connections[sdp->connectionsCount].nettype == NULL)
+      return -1;
+    strcpy(sdp->connections[sdp->connectionsCount].nettype,nettype);
+
+    sdp->connections[sdp->connectionsCount].addrtype=malloc(strlen(addrtype));
+    if(sdp->connections[sdp->connectionsCount].addrtype == NULL)
+      return -1;
+    strcpy(sdp->connections[sdp->connectionsCount].addrtype,addrtype);
+    
+    sdp->connections[sdp->connectionsCount].address=malloc(strlen(address));
+    if(sdp->connections[sdp->connectionsCount].address==NULL)
+      return -1;
+    strcpy(sdp->connections[sdp->connectionsCount].address,address);
+
+
+    return sdp->connectionsCount+=1;
+  }
+  return -1;
+}
+
+int SdpContent_addBandwidth(struct SdpContent *sdp,char *bwtype,char *bandwidth){
+  if(sdp != NULL && bwtype != NULL ){
+    if(sdp->bandwidthsCount <= 0 || sdp->bandwidths == NULL){
+      sdp->bandwidths=(struct SdpBandwidth *) malloc(sizeof(struct SdpBandwidth));
+      sdp->bandwidthsCount=0;
+    }else{
+      sdp->bandwidths=(struct SdpBandwidth *) realloc((void *)sdp->bandwidths,sizeof(struct SdpBandwidth)*(sdp->bandwidthsCount+1));
+    }
+    if(sdp->bandwidths == NULL)
+      return -1;
+
+    sdp->bandwidths[sdp->bandwidthsCount].bwtype=(char*) malloc((strlen(bwtype)+1));
+    strcpy(sdp->bandwidths[sdp->bandwidthsCount].bwtype,bwtype);
+    if(bandwidth == NULL)
+      sdp->bandwidths[sdp->bandwidthsCount].bandwidth=NULL;
+    else {
+      sdp->bandwidths[sdp->bandwidthsCount].bandwidth=(char *) malloc((strlen(bandwidth)+1));
+      strcpy(sdp->bandwidths[sdp->bandwidthsCount].bandwidth,bandwidth);
+    }
+
+    return sdp->bandwidthsCount+=1;
+  }
+  return -1;
+}
+
+int SdpContent_setEncryption(struct SdpContent *sdp,char *method,char *key){
+  if(sdp != NULL && method != NULL){
+    if(sdp->encryption.key != NULL)
+      free(sdp->encryption.key);
+    sdp->encryption.method=malloc(strlen(method));
+    strcpy(sdp->encryption.method,method);
+    if(key!=NULL){
+      sdp->encryption.key=malloc(strlen(key));
+      strcpy(sdp->encryption.key,key);
+    } else {
+      sdp->encryption.key = NULL;
+    }
+  }
 }
