@@ -8,11 +8,13 @@
 #ifndef SDP
   #define SDP
 
-  /*
-    Look at SDP specification
-    https://tools.ietf.org/html/rfc4566
-    P.S. email and phone numbers don't supported yet
-    (look at https://tools.ietf.org/html/rfc4566#section-5.6)
+  /**
+   * /brief Look at SDP specification
+   * https://tools.ietf.org/html/rfc4566 
+   * P.S. email and phone numbers don't supported yet
+   * (look at https://tools.ietf.org/html/rfc4566#section-5.6)
+   * 
+   * 
   */
   struct SdpContent{
     /*
@@ -215,15 +217,13 @@
                               char *bwtype,
                               char *bandwidth);
 
-  int SdpContent_setEncryption_wKey(struct SdpContent *sdp,
+  int SdpContent_setEncryption(struct SdpContent *sdp,
                                     char *method,
                                     char *key);
-  int SdpContent_setEncryption(struct SdpContent *sdp,char *method);
 
-  int SdpContent_addAtribute_wValue(struct SdpContent *sdp,
+  int SdpContent_addAtribute(struct SdpContent *sdp,
                                     char *attribute,
                                     char *value);
-  int SdpContent_addAtribute(struct SdpContent *sdp,char *attribute);
 
   int SdpContent_addMedia(struct SdpContent *sdp,
                           char *type,
@@ -241,11 +241,11 @@
                                     char *bwtype,
                                     char *bandwith);
 
-  int SdpContent_Media_setEncryption_wKey(struct SdpContent *sdp,
+  int SdpContent_Media_setEncryption(struct SdpContent *sdp,
                                           int mediaID,
                                           char *method,
                                           char *key);
-  int SdpContent_Media_setEncryption(struct SdpContent *sdp,
+  int SdpContent_Media_setEncryption_wKey(struct SdpContent *sdp,
                                      int mediaID,
                                      char *method);
 
@@ -256,9 +256,6 @@
   int SdpContent_Media_addAtribute(struct SdpContent *sdp,
                                    int mediaID,
                                    char *attribute);
-
-
-  //SDP MANAGE FUNCTIONS END
 
   //SDP PARSE FUNCTIONS(make doxygen module)
 
@@ -275,5 +272,6 @@
   int sdpstr(char *str,struct SdpContent *sdp);
 
   //SDP PARSE FUNCTIONS END
+  //SDP MANAGE FUNCTIONS END
 
 #endif 
